@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeastFit Gym</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #0b0b0f;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    header {
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)),
+        url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 8%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff4d00;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #fff;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ff4d00;
+    }
+
+    .menu-btn {
+      display: none;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8%;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      max-width: 600px;
+      animation: fadeUp 1s ease;
+    }
+
+    .hero-text h1 {
+      font-size: 58px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-text h1 span {
+      color: #ff4d00;
+    }
+
+    .hero-text p {
+      font-size: 18px;
+      color: #ddd;
+      margin-bottom: 28px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 30px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn-primary {
+      background: #ff4d00;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(255, 77, 0, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      background: #ff661f;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #ff4d00;
+    }
+
+    .btn-secondary:hover {
+      background: #ff4d00;
+      transform: translateY(-3px);
+    }
+
+    .hero-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 28px;
+      border-radius: 20px;
+      min-width: 300px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      animation: fadeUp 1.2s ease;
+    }
+
+    .hero-card h3 {
+      color: #ff4d00;
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    .hero-card .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: #eaeaea;
+    }
+
+    section {
+      padding: 80px 8%;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .section-title p {
+      color: #bfbfbf;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: #14141c;
+      border-radius: 18px;
+      padding: 28px;
+      transition: 0.35s;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(255, 77, 0, 0.15);
+      border-color: rgba(255, 77, 0, 0.45);
+    }
+
+    .feature-icon {
+      font-size: 34px;
+      margin-bottom: 15px;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 10px;
+      color: #ff4d00;
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 25px;
+    }
+
+    .plan-card {
+      background: linear-gradient(180deg, #171721, #101018);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: 0.35s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-card.popular {
+      border: 1px solid #ff4d00;
+      transform: scale(1.04);
+    }
+
+    .badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #ff4d00;
+      color: white;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .plan-card.popular:hover {
+      transform: scale(1.04) translateY(-8px);
+    }
+
+    .price {
+      font-size: 42px;
+      color: #ff4d00;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    .plan-card ul {
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .plan-card ul li {
+      padding: 10px 0;
+      color: #ddd;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .bmi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      align-items: center;
+    }
+
+    .bmi-box,
+    .tips-box {
+      background: #14141c;
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .bmi-box input,
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      margin: 12px 0;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #1f1f2b;
+      color: #fff;
+      outline: none;
+    }
+
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #ffb08a;
+    }
+
+    .tips-box ul {
+      padding-left: 18px;
+      color: #ddd;
+    }
+
+    .tips-box li {
+      margin-bottom: 12px;
+    }
+
+    .testimonials {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background: #14141c;
+      padding: 24px;
+      border-radius: 18px;
+      border-left: 4px solid #ff4d00;
+      transition: 0.3s;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .testimonial-card h4 {
+      margin-top: 14px;
+      color: #ff4d00;
+    }
+
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      align-items: center;
+    }
+
+    .contact-form {
+      background: #14141c;
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .contact-info {
+      background: linear-gradient(135deg, #ff4d00, #ff8a3d);
+      padding: 30px;
+      border-radius: 20px;
+      color: #fff;
+      box-shadow: 0 15px 35px rgba(255, 77, 0, 0.25);
+    }
+
+    .contact-info p {
+      margin: 15px 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #09090c;
+      color: #bbb;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .hero-text h1 {
+        font-size: 42px;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 75px;
+        right: 8%;
+        background: #111118;
+        flex-direction: column;
+        width: 220px;
+        padding: 20px;
+        border-radius: 14px;
+        display: none;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero-text h1 {
+        font-size: 34px;
+      }
+
+      .section-title h2 {
+        font-size: 30px;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="home">
+    <nav>
+      <div class="logo">BeastFit</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#plans">Plans</a></li>
+        <li><a href="#bmi">BMI</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="menu-btn" id="menuBtn">☰</div>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-text">
+        <h1>Build Your <span>Best Body</span> With BeastFit Gym</h1>
+        <p>
+          Transform your fitness journey with expert trainers, personalized workout plans,
+          nutrition guidance, and a powerful atmosphere that keeps you motivated every day.
+        </p>
+        <div class="btn-group">
+          <a href="#plans" class="btn btn-primary">Join Now</a>
+          <a href="#about" class="btn btn-secondary">Explore More</a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <h3>Why Choose Us?</h3>
+        <div class="stat"><span>Expert Trainers</span><strong>15+</strong></div>
+        <div class="stat"><span>Happy Members</span><strong>2,500+</strong></div>
+        <div class="stat"><span>Workout Programs</span><strong>30+</strong></div>
+        <div class="stat"><span>Open Hours</span><strong>5 AM - 11 PM</strong></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="about">
+    <div class="section-title">
+      <h2>Why BeastFit Stands Out</h2>
+      <p>
+        We combine world-class training, modern equipment, and practical fitness guidance to help you gain strength,
+        lose fat, and build lasting healthy habits.
+      </p>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🏋️</div>
+        <h3>Modern Equipment</h3>
+        <p>Train with high-quality machines, free weights, cardio stations, and strength zones.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💪</div>
+        <h3>Personal Training</h3>
+        <p>Get customized workout plans from certified trainers based on your goals and body type.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🥗</div>
+        <h3>Nutrition Tips</h3>
+        <p>Learn smart eating habits, recovery strategies, and meal planning for better fitness results.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔥</div>
+        <h3>Fat Loss Programs</h3>
+        <p>Burn calories faster with HIIT sessions, functional workouts, and guided progress tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="plans">
+    <div class="section-title">
+      <h2>Membership Plans</h2>
+      <p>Select a package that matches your fitness goals and start training with full energy.</p>
+    </div>
+
+    <div class="plans">
+      <div class="plan-card">
+        <h3>Basic</h3>
+        <div class="price">₹999<span style="font-size:16px;color:#ccc;">/month</span></div>
+        <ul>
+          <li>Gym Floor Access</li>
+          <li>Cardio Training</li>
+          <li>Locker Facility</li>
+          <li>1 Fitness Assessment</li>
+        </ul>
+        <a href="#contact" class="btn btn-secondary">Choose Plan</a>
+      </div>
+
+      <div class="plan-card popular">
+        <span class="badge">Popular</span>
+        <h3>Premium</h3>
+        <div class="price">₹1999<span style="font-size:16px;color:#ccc;">/month</span></div>
+        <ul>
+          <li>Everything in Basic</li>
+          <li>Personal Trainer</li>
+          <li>Diet Consultation</li>
+          <li>Progress Tracking</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary">Choose Plan</a>
+      </div>
+
+      <div class="plan-card">
+        <h3>Elite</h3>
+        <div class="price">₹2999<span style="font-size:16px;color:#ccc;">/month</span></div>
+        <ul>
+          <li>Everything in Premium</li>
+          <li>Unlimited Group Classes</li>
+          <li>Weekly Personal Coaching</li>
+          <li>Advanced Fitness Report</li>
+        </ul>
+        <a href="#contact" class="btn btn-secondary">Choose Plan</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="bmi">
+    <div class="section-title">
+      <h2>BMI Calculator & Fitness Tips</h2>
+      <p>Check your Body Mass Index and follow simple tips to improve your everyday health.</p>
+    </div>
+
+    <div class="bmi-container">
+      <div class="bmi-box">
+        <h3 style="margin-bottom: 15px; color:#ff4d00;">Calculate Your BMI</h3>
+        <input type="number" id="height" placeholder="Enter height in cm" />
+        <input type="number" id="weight" placeholder="Enter weight in kg" />
+        <button class="btn btn-primary" onclick="calculateBMI()">Calculate BMI</button>
+        <div class="result" id="bmiResult">Your BMI result will appear here.</div>
+      </div>
+
+      <div class="tips-box">
+        <h3 style="margin-bottom: 15px; color:#ff4d00;">Best Fitness Tips</h3>
+        <ul>
+          <li>Stay consistent with workouts at least 4 to 5 days a week.</li>
+          <li>Prioritize protein, vegetables, fruits, and proper hydration.</li>
+          <li>Sleep 7 to 8 hours daily for muscle recovery and energy.</li>
+          <li>Warm up before exercise and stretch after training.</li>
+          <li>Track your progress with photos, weight, and strength improvements.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2>What Our Members Say</h2>
+      <p>Real stories from people who transformed themselves with BeastFit Gym.</p>
+    </div>
+
+    <div class="testimonials">
+      <div class="testimonial-card">
+        <p>“I lost 8 kg in 3 months and feel more confident than ever. Trainers are supportive and motivating.”</p>
+        <h4>— Rahul Patil</h4>
+      </div>
+      <div class="testimonial-card">
+        <p>“The gym atmosphere is amazing. Equipment is modern and the workout plans are easy to follow.”</p>
+        <h4>— Sneha Joshi</h4>
+      </div>
+      <div class="testimonial-card">
+        <p>“The premium plan helped me build strength and discipline. I highly recommend BeastFit to beginners.”</p>
+        <h4>— Akash More</h4>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="section-title">
+      <h2>Contact Us</h2>
+      <p>Start your transformation today. Reach out and book your first session with BeastFit Gym.</p>
+    </div>
+
+    <div class="contact-wrapper">
+      <form class="contact-form" onsubmit="submitForm(event)">
+        <input type="text" id="name" placeholder="Enter your name" required />
+        <input type="email" id="email" placeholder="Enter your email" required />
+        <input type="text" id="goal" placeholder="Your fitness goal" required />
+        <textarea id="message" rows="5" placeholder="Write your message"></textarea>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+      </form>
+
+      <div class="contact-info">
+        <h3>BeastFit Gym</h3>
+        <p><strong>Address:</strong> Pune, Maharashtra</p>
+        <p><strong>Phone:</strong> +91 98765 43210</p>
+        <p><strong>Email:</strong> info@beastfitgym.com</p>
+        <p><strong>Hours:</strong> Monday - Sunday | 5:00 AM - 11:00 PM</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 BeastFit Gym. All Rights Reserved. Designed with HTML, CSS & JavaScript.</p>
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const navLinks = document.getElementById('navLinks');
+
+    menuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+
+    function calculateBMI() {
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const result = document.getElementById('bmiResult');
+
+      if (!height || !weight || height <= 0 || weight <= 0) {
+        result.textContent = 'Please enter valid height and weight.';
+        return;
+      }
+
+      const bmi = weight / ((height / 100) * (height / 100));
+      let category = '';
+
+      if (bmi < 18.5) {
+        category = 'Underweight';
+      } else if (bmi < 24.9) {
+        category = 'Normal weight';
+      } else if (bmi < 29.9) {
+        category = 'Overweight';
+      } else {
+        category = 'Obese';
+      }
+
+      result.textContent = `Your BMI is ${bmi.toFixed(1)} (${category}).`;
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+      const name = document.getElementById('name').value;
+      alert(`Thank you, ${name}! Your message has been sent successfully.`);
+      event.target.reset();
+    }
+  </script>
+</body>
+</html>
