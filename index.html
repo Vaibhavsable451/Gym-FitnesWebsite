@@ -387,6 +387,266 @@
       }
     }
 
+    /* Training Section Styles */
+    .training-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+      align-items: center;
+    }
+
+    .training-img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+    }
+
+    .training-content h3 {
+      font-size: 32px;
+      color: #ff4d00;
+      margin-bottom: 20px;
+    }
+
+    .training-list {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .training-list li {
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .training-list li::before {
+      content: '✔';
+      color: #ff4d00;
+      font-weight: bold;
+    }
+
+    /* Classes Section Styles */
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
+
+    .class-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 350px;
+      cursor: pointer;
+    }
+
+    .class-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.5s;
+    }
+
+    .class-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .class-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 30px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.9));
+      color: #fff;
+    }
+
+    .class-overlay h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #ff4d00;
+    }
+
+    /* Franchise (Own a Gym) Section Styles */
+    .franchise-banner {
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_franchise_interior_1775032218924.png') center/cover no-repeat;
+      padding: 100px 8%;
+      text-align: center;
+      border-radius: 30px;
+      margin: 40px 8%;
+    }
+
+    .franchise-banner h2 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .franchise-banner p {
+      font-size: 20px;
+      max-width: 800px;
+      margin: 0 auto 30px;
+      color: #ddd;
+    }
+
+    /* Trainer Section Styles */
+    .trainers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .trainer-card {
+      background: #14141c;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: 0.35s;
+      border: 1px solid rgba(255,255,255,0.05);
+      text-align: center;
+    }
+
+    .trainer-card:hover {
+      transform: translateY(-10px);
+      border-color: #ff4d00;
+      box-shadow: 0 15px 40px rgba(255, 77, 0, 0.3);
+    }
+
+    .trainer-card:hover .trainer-img {
+      filter: brightness(1.1);
+    }
+
+    .trainer-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    .trainer-info {
+      padding: 20px;
+    }
+
+    .trainer-info h4 {
+      font-size: 22px;
+      margin-bottom: 5px;
+      color: #ff4d00;
+    }
+
+    .trainer-info span {
+      color: #aaa;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    .trainer-socials {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .trainer-socials a {
+      color: #fff;
+      font-size: 18px;
+      transition: 0.3s;
+    }
+
+    .trainer-socials a:hover {
+      color: #ff4d00;
+    }
+
+    /* Gallery Section Styles */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-auto-rows: 200px;
+      gap: 15px;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.5s;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-item.tall {
+      grid-row: span 2;
+    }
+
+    .gallery-item.wide {
+      grid-column: span 2;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+      background: #14141c;
+      width: 90%;
+      max-width: 600px;
+      padding: 40px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 77, 0, 0.3);
+      position: relative;
+      text-align: center;
+      animation: modalFade 0.4s ease;
+    }
+
+    @keyframes modalFade {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      font-size: 30px;
+      cursor: pointer;
+      color: #ff4d00;
+    }
+
+    .modal-img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 28px;
+      color: #ff4d00;
+      margin-bottom: 15px;
+    }
+
+    .modal-desc {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
     @media (max-width: 860px) {
       .hero-text h1 {
         font-size: 42px;
@@ -435,9 +695,14 @@
       <div class="logo">BeastFit</div>
       <ul class="nav-links" id="navLinks">
         <li><a href="#home">Home</a></li>
-        <li><a href="#about">About</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#training">Training</a></li>
+        <li><a href="#trainers">Trainers</a></li>
+        <li><a href="#classes">Classes</a></li>
         <li><a href="#plans">Plans</a></li>
+        <li><a href="#gallery">Gallery</a></li>
         <li><a href="#bmi">BMI</a></li>
+        <li><a href="#franchise">Own a Gym</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
       <div class="menu-btn" id="menuBtn">☰</div>
@@ -468,10 +733,10 @@
 
   <section id="about">
     <div class="section-title">
-      <h2>Why BeastFit Stands Out</h2>
+      <h2>About BeastFit Gym</h2>
       <p>
-        We combine world-class training, modern equipment, and practical fitness guidance to help you gain strength,
-        lose fat, and build lasting healthy habits.
+        Founded in 2010, BeastFit Gym has become the ultimate destination for fitness enthusiasts. 
+        We are more than just a gym; we are a community dedicated to pushing limits and achieving greatness.
       </p>
     </div>
 
@@ -495,6 +760,134 @@
         <div class="feature-icon">🔥</div>
         <h3>Fat Loss Programs</h3>
         <p>Burn calories faster with HIIT sessions, functional workouts, and guided progress tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="training" style="background: #0f0f16;">
+    <div class="section-title">
+      <h2>Professional Training</h2>
+      <p>Our trainers are here to guide you through every step of your fitness journey.</p>
+    </div>
+    <div class="training-grid">
+      <div class="training-img-container">
+        <img src="C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_training_session_1775032162354.png" alt="Training Session" class="training-img">
+      </div>
+      <div class="training-content">
+        <h3>Maximize Your Potential</h3>
+        <p>Whether you are a beginner or an elite athlete, our personalized training programs ensure you reach your goals faster and safer.</p>
+        <ul class="training-list">
+          <li>One-on-One Personal Training</li>
+          <li>Strength & Conditioning Programs</li>
+          <li>Post-Rehab & Corrective Exercise</li>
+          <li>Athletic Performance Development</li>
+          <li>Weight Management Coaching</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" style="margin-top: 25px;">Book a Trainer</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="trainers">
+    <div class="section-title">
+      <h2>Meet Our Elite Trainers</h2>
+      <p>Certified experts dedicated to helping you achieve your physical best.</p>
+    </div>
+    <div class="trainers-grid">
+      <div class="trainer-card">
+        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=400&q=80" alt="Trainer 1" class="trainer-img">
+        <div class="trainer-info">
+          <h4>Vikram Singh</h4>
+          <span>Strength & Conditioning</span>
+          <div class="trainer-socials">
+            <a href="#">FB</a> <a href="#">IG</a> <a href="#">TW</a>
+          </div>
+        </div>
+      </div>
+      <div class="trainer-card">
+        <img src="https://images.unsplash.com/photo-1548690312-e3b507d17a4d?auto=format&fit=crop&w=400&q=80" alt="Trainer 2" class="trainer-img">
+        <div class="trainer-info">
+          <h4>Anjali Sharma</h4>
+          <span>Yoga & HIIT Specialist</span>
+          <div class="trainer-socials">
+            <a href="#">FB</a> <a href="#">IG</a> <a href="#">TW</a>
+          </div>
+        </div>
+      </div>
+      <div class="trainer-card">
+        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80" alt="Trainer 3" class="trainer-img">
+        <div class="trainer-info">
+          <h4>Rohan Mehta</h4>
+          <span>Bodybuilding Coach</span>
+          <div class="trainer-socials">
+            <a href="#">FB</a> <a href="#">IG</a> <a href="#">TW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="classes">
+    <div class="section-title">
+      <h2>Our Featured Classes</h2>
+      <p>Join our group sessions led by expert instructors and stay motivated with the community.</p>
+    </div>
+    <div class="classes-grid">
+      <div class="class-card" onclick="openClassModal('Mental Zen & Yoga', 'Improve flexibility, reduce stress, and find your inner peace with our expert-led yoga sessions suitable for all levels.', 'C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_classes_yoga_1775032139850.png')">
+        <img src="C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_classes_yoga_1775032139850.png" alt="Yoga Class">
+        <div class="class-overlay">
+          <h3>Mental Zen & Yoga</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('Body Building', 'Focused on hypertrophy and strength, our body building sessions guide you through the perfect form for maximum muscle growth.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80')">
+        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80" alt="Body Building">
+        <div class="class-overlay">
+          <h3>Body Building</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('HIIT Training', 'High-Intensity Interval Training designed to spike your heart rate and burn fat efficiently in just 45 minutes.', 'https://images.unsplash.com/photo-1543975200-8e313fb04fc7?auto=format&fit=crop&w=600&q=80')">
+        <img src="https://images.unsplash.com/photo-1543975200-8e313fb04fc7?auto=format&fit=crop&w=600&q=80" alt="HIIT Training">
+        <div class="class-overlay">
+          <h3>HIIT Training</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('CrossFit Power', 'Join the industrial-style workout that combines weightlifting, cardio, and gymnastics for total functional fitness.', 'C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_crossfit_action_1775032855776.png')">
+        <img src="C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_crossfit_action_1775032855776.png" alt="CrossFit">
+        <div class="class-overlay">
+          <h3>CrossFit Power</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('Zumba Dance', 'Dance your way to fitness with high-energy Zumba sessions. Great for cardio and mood lifting.', 'C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_zumba_dance_1775033057220.png')">
+        <img src="C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_zumba_dance_1775033057220.png" alt="Zumba">
+        <div class="class-overlay">
+          <h3>Zumba Dance</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('Elite Powerlifting', 'Go heavy or go home. Specialist coaching for Squat, Bench, and Deadlift movements.', 'C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_powerlifting_heavy_1775033091912.png')">
+        <img src="C:/Users/Vibhav/.gemini/antigravity/brain/cb7aa527-9476-44ea-bb03-d545ea7d421d/gym_powerlifting_heavy_1775033091912.png" alt="Powerlifting">
+        <div class="class-overlay">
+          <h3>Elite Powerlifting</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('Boxing Strike', 'Relieve stress and build insane cardio with our professional boxing and heavy bag classes.', 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=600&q=80')">
+        <img src="https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=600&q=80" alt="Boxing">
+        <div class="class-overlay">
+          <h3>Boxing Strike</h3>
+          <p>Click to learn more</p>
+        </div>
+      </div>
+      <div class="class-card" onclick="openClassModal('Spinning Burn', 'Join the neon lights and high energy of our indoor cycling studio. Burn up to 600 calories an hour.', 'https://images.unsplash.com/photo-1534258936925-c58dec473f8a?auto=format&fit=crop&w=600&q=80')">
+        <img src="https://images.unsplash.com/photo-1534258936925-c58dec473f8a?auto=format&fit=crop&w=600&q=80" alt="Spinning">
+        <div class="class-overlay">
+          <h3>Spinning Burn</h3>
+          <p>Click to learn more</p>
+        </div>
       </div>
     </div>
   </section>
@@ -573,6 +966,32 @@
     </div>
   </section>
 
+  <section id="franchise">
+    <div class="franchise-banner">
+      <h2>Own a World Gym</h2>
+      <p>Take the first step toward becoming a business owner and join the global leader in fitness. Partner with BeastFit to open your own world-class gym.</p>
+      <div class="btn-group" style="justify-content: center;">
+        <a href="#contact" class="btn btn-primary">Franchise Inquiry</a>
+        <a href="#" class="btn btn-secondary">Download Brochure</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <div class="section-title">
+      <h2>BeastFit Life Gallery</h2>
+      <p>Glimpses of the hard work and passion that happens inside our walls every day.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item tall"><img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80" alt="Gallery 1"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=600&q=80" alt="Gallery 2"></div>
+      <div class="gallery-item wide"><img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80" alt="Gallery 3"></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80" alt="Gallery 4"></div>
+      <div class="gallery-item tall"><img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?auto=format&fit=crop&w=600&q=80" alt="Gallery 5"></div>
+      <div class="gallery-item wide"><img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?auto=format&fit=crop&w=600&q=80" alt="Gallery 6"></div>
+    </div>
+  </section>
+
   <section>
     <div class="section-title">
       <h2>What Our Members Say</h2>
@@ -620,6 +1039,17 @@
     </div>
   </section>
 
+  <!-- Modal Component -->
+  <div class="modal-overlay" id="classModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <img src="" alt="Class Image" class="modal-img" id="modalImg">
+      <h3 class="modal-title" id="modalTitle">Class Title</h3>
+      <p class="modal-desc" id="modalDesc">Class description goes here.</p>
+      <a href="#contact" class="btn btn-primary" onclick="closeModal()">Join This Class</a>
+    </div>
+  </div>
+
   <footer>
     <p>© 2026 BeastFit Gym. All Rights Reserved. Designed with HTML, CSS & JavaScript.</p>
   </footer>
@@ -631,6 +1061,31 @@
     menuBtn.addEventListener('click', () => {
       navLinks.classList.toggle('active');
     });
+
+    const classModal = document.getElementById('classModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+
+    function openClassModal(title, desc, img) {
+      modalTitle.textContent = title;
+      modalDesc.textContent = desc;
+      modalImg.src = img;
+      classModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Stop scrolling
+    }
+
+    function closeModal() {
+      classModal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Re-enable scrolling
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target == classModal) {
+        closeModal();
+      }
+    }
 
     function calculateBMI() {
       const height = parseFloat(document.getElementById('height').value);
