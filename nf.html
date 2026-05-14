@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Enterprise DevOps Dashboard v3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1220;--bg2:#0F1A2E;--bg3:#111F38;
+  --glass:rgba(255,255,255,0.04);--glass-b:rgba(255,255,255,0.08);
+  --blue:#3B82F6;--purple:#8B5CF6;--teal:#10B981;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;--yellow:#FACC15;
+  --blue-d:#1D4ED8;--teal-d:#059669;
+  --txt:#E2E8F0;--txt2:#94A3B8;--txt3:#475569;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+@keyframes pulseRing{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.15;transform:scale(1.18)}}
+@keyframes nodeGlow{0%,100%{box-shadow:0 0 12px var(--g,#3B82F6),0 0 24px var(--g2,rgba(59,130,246,.3))}50%{box-shadow:0 0 20px var(--g,#3B82F6),0 0 40px var(--g2,rgba(59,130,246,.5))}}
+@keyframes termBlink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(800%)}}
+@keyframes countUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes podPulse{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes flowDash{to{stroke-dashoffset:-24}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes queuePulse{0%,100%{opacity:.6;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.02)}}
+@keyframes retryFlash{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes successBurst{0%{transform:scale(0);opacity:1}100%{transform:scale(2.5);opacity:0}}
+@keyframes kafkaFan{0%{opacity:0;transform:scaleY(0)}20%{opacity:1;transform:scaleY(1)}80%{opacity:1}100%{opacity:0}}
+@keyframes lbSplit{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
+@keyframes metricsCount{from{opacity:.4}to{opacity:1}}
+@keyframes podScale{0%{transform:scale(1);border-color:rgba(16,185,129,.2)}50%{transform:scale(1.15);border-color:rgba(16,185,129,.6);box-shadow:0 0 8px rgba(16,185,129,.4)}100%{transform:scale(1);border-color:rgba(16,185,129,.2)}}
+
+.wrap{background:var(--bg);border-radius:16px;overflow:hidden;font-family:var(--mono);color:var(--txt);min-height:600px;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.05),0 24px 80px rgba(0,0,0,.6)}
+.scanline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(transparent,rgba(59,130,246,.06),transparent);animation:scanline 8s linear infinite;pointer-events:none;z-index:10}
+
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(15,26,46,.9);border-bottom:1px solid rgba(255,255,255,.05)}
+.dot-r{width:10px;height:10px;border-radius:50%;background:#EF4444;box-shadow:0 0 6px #EF4444}
+.dot-y{width:10px;height:10px;border-radius:50%;background:#F59E0B;box-shadow:0 0 6px #F59E0B}
+.dot-g{width:10px;height:10px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981}
+.title-tag{font-size:11px;color:var(--txt2);letter-spacing:.04em;margin-left:6px}
+.status-pill{margin-left:auto;font-size:10px;background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.25);padding:3px 10px;border-radius:20px;letter-spacing:.05em}
+.controls{display:flex;gap:6px;margin-left:12px}
+.ctrl-btn{font-size:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--txt2);padding:3px 10px;border-radius:6px;cursor:pointer;transition:all .2s;font-family:var(--mono)}
+.ctrl-btn:hover{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:var(--blue)}
+.ctrl-btn.on{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.5);color:var(--blue)}
+.ctrl-btn.danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:var(--red)}
+
+/* METRICS */
+.metrics-row{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.05)}
+.metric{background:var(--bg2);padding:8px 12px;position:relative;overflow:hidden;cursor:default}
+.metric::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--mc,#3B82F6),transparent);opacity:.4}
+.m-label{font-size:8.5px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.m-val{font-size:16px;font-weight:700;color:var(--mc,#3B82F6);animation:metricsCount .4s ease}
+.m-sub{font-size:8px;color:var(--txt3);margin-top:1px}
+.m-bar{height:2px;border-radius:1px;margin-top:5px;background:rgba(255,255,255,.06)}
+.m-fill{height:100%;border-radius:1px;background:var(--mc,#3B82F6);transition:width 1.2s ease}
+.m-delta{font-size:9px;position:absolute;top:8px;right:8px}
+.delta-up{color:#10B981}.delta-dn{color:#EF4444}
+
+/* MAIN */
+.main-grid{display:grid;grid-template-columns:1fr 270px;min-height:460px}
+.diagram-area{position:relative;padding:0;overflow:hidden;background:var(--bg)}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.02) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+svg.arch{width:100%;display:block}
+
+.node-group{cursor:pointer}
+.gnode{transition:all .25s}
+.gnode:hover .node-rect{stroke-opacity:.9!important;filter:drop-shadow(0 0 6px var(--nhc,#3B82F6))}
+.node-rect{rx:7;stroke-width:1;fill:rgba(15,26,46,.8);transition:all .2s}
+.node-title{font-size:10px;font-weight:600;fill:var(--ntc,#E2E8F0);font-family:'JetBrains Mono',ui-monospace,monospace}
+.node-sub{font-size:8px;fill:var(--nsc,#64748B);font-family:'JetBrains Mono',ui-monospace,monospace}
+
+.pipe-base{fill:none;stroke-width:1.5;opacity:.18;stroke-dasharray:5 4}
+.pipe-anim{fill:none;stroke-width:1.5;stroke-dasharray:5 4;animation:flowDash 1.4s linear infinite}
+.pipe-return{fill:none;stroke-width:1;stroke-dasharray:3 5;opacity:.15;animation:flowDash 1.8s linear infinite reverse}
+
+.ring{fill:none;stroke-width:7;opacity:.1}
+.ring-anim{animation:pulseRing 2s ease-in-out infinite}
+
+/* QUEUE VISUALIZER */
+.queue-bar{height:4px;border-radius:2px;margin:2px 0;animation:queuePulse 1.5s ease-in-out infinite;transform-origin:left}
+
+/* SIDE PANEL */
+.side-panel{background:var(--bg2);border-left:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;overflow:hidden}
+.panel-section{border-bottom:1px solid rgba(255,255,255,.05);padding:10px 12px}
+.panel-label{font-size:8.5px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+
+.pod-grid{display:flex;flex-wrap:wrap;gap:3px}
+.pod{width:26px;height:18px;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-size:7px;color:#10B981;font-family:var(--mono);animation:podPulse 2s ease-in-out infinite;cursor:pointer;transition:all .2s}
+.pod:hover{background:rgba(16,185,129,.25);transform:scale(1.1)}
+.pod.warn{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:var(--amber);animation:retryFlash .6s ease-in-out infinite}
+.pod.dead{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:var(--red);animation:none}
+.pod.scaling{animation:podScale .8s ease-in-out 3}
+
+.mini-chart{height:36px;display:flex;align-items:flex-end;gap:2px;padding:0 2px}
+.mini-bar{flex:1;border-radius:2px 2px 0 0;transition:height .8s ease,background .5s ease;min-height:4px}
+
+.term{background:#070d1a;border-radius:6px;padding:8px;font-family:var(--mono);font-size:9px;line-height:1.75;max-height:160px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.04)}
+.term-line{display:flex;gap:5px;animation:fadeIn .15s ease}
+.t-time{color:#2d4a6e;white-space:nowrap;font-size:8.5px}
+.t-info{color:#3B82F6}.t-warn{color:var(--amber)}.t-err{color:var(--red)}.t-ok{color:var(--teal)}.t-retry{color:#FACC15}
+.t-msg{color:#7a9db5}
+.cursor{display:inline-block;width:5px;height:9px;background:var(--blue);animation:termBlink .9s step-end infinite;vertical-align:middle}
+
+.cicd-bar{display:flex;gap:0;margin-top:4px}
+.cicd-step{flex:1;height:3px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+.cicd-step.done{background:rgba(16,185,129,.5)}
+.cicd-step.run{background:rgba(59,130,246,.3)}
+.cicd-step.run::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(59,130,246,.9),transparent);animation:flowDash .9s linear infinite}
+.cicd-labels{display:flex;gap:0;margin-top:3px}
+.cicd-lbl{flex:1;font-size:7.5px;color:var(--txt3);text-align:center}
+
+.tooltip-box{position:absolute;background:rgba(7,13,26,.97);border:1px solid rgba(59,130,246,.35);border-radius:8px;padding:8px 12px;font-size:10px;color:var(--txt);pointer-events:none;display:none;z-index:200;backdrop-filter:blur(16px);max-width:190px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.tt-title{font-weight:700;color:var(--blue);margin-bottom:4px;font-size:11px}
+.tt-row{display:flex;justify-content:space-between;gap:14px;margin:2px 0}
+.tt-key{color:var(--txt3)}.tt-val{color:var(--teal)}
+
+/* PACKET LABEL STYLE */
+.pkt-label{position:absolute;pointer-events:none;font-family:var(--mono);font-size:7.5px;font-weight:600;white-space:nowrap;padding:1px 4px;border-radius:3px;z-index:50;line-height:1}
+
+/* QUEUE DISPLAY */
+#queue-display{position:absolute;background:rgba(7,13,26,.92);border:1px solid rgba(245,158,11,.25);border-radius:6px;padding:5px 8px;pointer-events:none;z-index:30;min-width:90px;display:none}
+.queue-title{font-size:8px;color:var(--amber);letter-spacing:.06em;margin-bottom:3px}
+.queue-item{height:3px;border-radius:2px;margin:2px 0;transition:width .3s ease}
+
+/* CACHE BADGE */
+.cache-badge{position:absolute;font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;pointer-events:none;z-index:40;animation:fadeIn .15s ease}
+.cache-hit{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.5);color:#10B981}
+.cache-miss{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.5);color:#F59E0B}
+
+/* LEGEND */
+.legend-row{display:flex;gap:10px;padding:7px 14px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.05);background:rgba(11,18,32,.6)}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:8.5px;color:var(--txt3)}
+.legend-dot{width:6px;height:6px;border-radius:50%}
+.legend-line{width:16px;height:2px;border-radius:1px}
+
+/* RPS counter */
+.rps-display{position:absolute;top:8px;right:8px;background:rgba(7,13,26,.85);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:4px 8px;font-size:9px;font-family:var(--mono);color:var(--blue);z-index:20}
+
+/* Kafka consumers */
+.kafka-consumer{position:absolute;font-family:var(--mono);font-size:8px;color:#F9A8D4;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);border-radius:4px;padding:2px 5px;pointer-events:none}
+</style>
+</head>
+<body style="background:#060d1a;padding:16px;min-height:100vh">
+
+<div class="wrap" id="wrap">
+<div class="scanline"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div>
+  <span class="title-tag">INFRA-DASHBOARD · PROD-CLUSTER-01 · CONCURRENT TRAFFIC VIEW</span>
+  <div class="controls">
+    <button class="ctrl-btn on" id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+    <button class="ctrl-btn danger" onclick="injectError()">⚡ INJECT FAIL</button>
+    <button class="ctrl-btn" onclick="injectCacheMiss()">🗄 CACHE MISS</button>
+    <button class="ctrl-btn" id="btn-speed" onclick="cycleSpeed()">1× SPEED</button>
+    <button class="ctrl-btn" onclick="triggerAutoscale()">↑ AUTOSCALE</button>
+  </div>
+  <div class="status-pill" id="sys-status">● SYSTEM HEALTHY</div>
+</div>
+
+<!-- METRICS ROW -->
+<div class="metrics-row" id="metrics-row">
+  <div class="metric" style="--mc:#3B82F6">
+    <div class="m-label">Req/sec</div>
+    <div class="m-val" id="m-rps">4,821</div>
+    <div class="m-sub">concurrency · 340</div>
+    <div class="m-bar"><div class="m-fill" id="b-rps" style="width:58%"></div></div>
+    <div class="m-delta delta-up" id="d-rps">↑ 12%</div>
+  </div>
+  <div class="metric" style="--mc:#F59E0B">
+    <div class="m-label">Latency p99</div>
+    <div class="m-val" id="m-lat">142ms</div>
+    <div class="m-sub">p50 · 38ms</div>
+    <div class="m-bar"><div class="m-fill" id="b-lat" style="width:35%"></div></div>
+    <div class="m-delta delta-up" id="d-lat">↓ 12ms</div>
+  </div>
+  <div class="metric" style="--mc:#8B5CF6">
+    <div class="m-label">Kafka msg/s</div>
+    <div class="m-val" id="m-kafka">12.4k</div>
+    <div class="m-sub">lag · 0ms · 8 parts</div>
+    <div class="m-bar"><div class="m-fill" id="b-kafka" style="width:62%"></div></div>
+    <div class="m-delta delta-up" id="d-kafka">↑ 8.2%</div>
+  </div>
+  <div class="metric" style="--mc:#10B981">
+    <div class="m-label">Cache Hit</div>
+    <div class="m-val" id="m-cache">84%</div>
+    <div class="m-sub">Redis · 48k ops/s</div>
+    <div class="m-bar"><div class="m-fill" id="b-cache" style="width:84%"></div></div>
+    <div class="m-delta delta-up" id="d-cache">↑ 2%</div>
+  </div>
+  <div class="metric" style="--mc:#F59E0B">
+    <div class="m-label">CPU cluster</div>
+    <div class="m-val" id="m-cpu">72%</div>
+    <div class="m-sub">8 nodes · avg</div>
+    <div class="m-bar"><div class="m-fill" id="b-cpu" style="width:72%"></div></div>
+    <div class="m-delta delta-dn" id="d-cpu">↑ 4%</div>
+  </div>
+  <div class="metric" style="--mc:#EF4444">
+    <div class="m-label">Error rate</div>
+    <div class="m-val" id="m-err">0.12%</div>
+    <div class="m-sub">retries · 0.04%</div>
+    <div class="m-bar"><div class="m-fill" id="b-err" style="width:12%"></div></div>
+    <div class="m-delta delta-up" id="d-err">↓ 0.03%</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+<div class="diagram-area" id="diag">
+  <div class="grid-bg"></div>
+  <div id="particle-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:15"></div>
+  <div id="badge-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:25"></div>
+  <div class="rps-display" id="rps-live">⚡ 0 req/s live</div>
+
+  <svg class="arch" viewBox="0 0 490 445" id="arch-svg" style="position:relative;z-index:10">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- LANE LABELS -->
+    <text x="10" y="28" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">FRONTEND / CDN</text>
+    <text x="10" y="108" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">API GATEWAY</text>
+    <text x="10" y="188" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">LOAD BALANCER → PODS</text>
+    <text x="10" y="285" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">DATA / CACHE</text>
+    <text x="10" y="368" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">KAFKA CONSUMERS</text>
+    <text x="10" y="425" font-size="7.5" fill="#1a3355" font-family="'JetBrains Mono',monospace" letter-spacing=".08em">CI / CD · MONITORING</text>
+
+    <!-- LANE DIVIDERS -->
+    <line x1="0" y1="38" x2="490" y2="38" stroke="rgba(59,130,246,.05)" stroke-width="1"/>
+    <line x1="0" y1="118" x2="490" y2="118" stroke="rgba(59,130,246,.05)" stroke-width="1"/>
+    <line x1="0" y1="198" x2="490" y2="198" stroke="rgba(59,130,246,.05)" stroke-width="1"/>
+    <line x1="0" y1="295" x2="490" y2="295" stroke="rgba(59,130,246,.05)" stroke-width="1"/>
+    <line x1="0" y1="378" x2="490" y2="378" stroke="rgba(59,130,246,.05)" stroke-width="1"/>
+
+    <!-- ===== FRONTEND LANE ===== -->
+    <!-- Browser -->
+    <g id="n-browser" class="node-group gnode" onclick="nodeClick('browser',event)">
+      <circle class="ring ring-anim" cx="60" cy="68" r="24" stroke="#3B82F6"/>
+      <rect class="node-rect" x="20" y="52" width="80" height="32" stroke="#3B82F6" stroke-opacity=".65"/>
+      <text class="node-title" x="60" y="65" text-anchor="middle" dominant-baseline="central" fill="#93C5FD">Browser</text>
+      <text class="node-sub" x="60" y="77" text-anchor="middle" dominant-baseline="central">React / HTTP2</text>
+    </g>
+    <!-- CDN -->
+    <g id="n-cdn" class="node-group gnode" onclick="nodeClick('cdn',event)">
+      <rect class="node-rect" x="140" y="52" width="76" height="32" stroke="#10B981" stroke-opacity=".5"/>
+      <text class="node-title" x="178" y="65" text-anchor="middle" dominant-baseline="central" fill="#6EE7B7">CDN</text>
+      <text class="node-sub" x="178" y="77" text-anchor="middle" dominant-baseline="central">CloudFront</text>
+    </g>
+    <!-- Nginx -->
+    <g id="n-nginx" class="node-group gnode" onclick="nodeClick('nginx',event)">
+      <rect class="node-rect" x="250" y="52" width="76" height="32" stroke="#F59E0B" stroke-opacity=".5"/>
+      <text class="node-title" x="288" y="65" text-anchor="middle" dominant-baseline="central" fill="#FCD34D">Nginx</text>
+      <text class="node-sub" x="288" y="77" text-anchor="middle" dominant-baseline="central">SSL · Proxy</text>
+    </g>
+    <!-- Queue indicator at gateway -->
+    <g id="n-queue-indicator">
+      <rect x="400" y="52" width="78" height="32" rx="6" fill="rgba(245,158,11,.07)" stroke="rgba(245,158,11,.25)" stroke-width="1"/>
+      <text x="439" y="63" font-size="8" fill="#F59E0B" font-family="'JetBrains Mono',monospace" text-anchor="middle">REQ QUEUE</text>
+      <rect id="q-bar-1" x="406" y="71" width="50" height="2" rx="1" fill="#F59E0B" opacity=".7"/>
+      <rect id="q-bar-2" x="406" y="74" width="35" height="2" rx="1" fill="#F59E0B" opacity=".5"/>
+      <rect id="q-bar-3" x="406" y="77" width="42" height="2" rx="1" fill="#F59E0B" opacity=".4"/>
+    </g>
+
+    <!-- ===== GATEWAY ===== -->
+    <g id="n-gw" class="node-group gnode" onclick="nodeClick('gateway',event)">
+      <circle class="ring ring-anim" cx="245" cy="143" r="28" stroke="#F59E0B" style="animation-delay:.4s"/>
+      <rect class="node-rect" x="170" y="127" width="150" height="32" stroke="#F59E0B" stroke-opacity=".65"/>
+      <text class="node-title" x="245" y="140" text-anchor="middle" dominant-baseline="central" fill="#FCD34D">API Gateway</text>
+      <text class="node-sub" x="245" y="152" text-anchor="middle" dominant-baseline="central">JWT · RateLimit · 42 routes</text>
+    </g>
+
+    <!-- ===== LOAD BALANCER ===== -->
+    <g id="n-lb" class="node-group gnode" onclick="nodeClick('lb',event)">
+      <rect class="node-rect" x="170" y="210" width="150" height="28" stroke="#EC4899" stroke-opacity=".6"/>
+      <text class="node-title" x="245" y="222" text-anchor="middle" dominant-baseline="central" fill="#F9A8D4">Load Balancer</text>
+      <text class="node-sub" x="245" y="232" text-anchor="middle" dominant-baseline="central">Envoy · WRR · 3 pods</text>
+    </g>
+
+    <!-- ===== 3 SPRING BOOT PODS (Load balanced) ===== -->
+    <g id="n-pod1" class="node-group gnode" onclick="nodeClick('pod1',event)">
+      <rect class="node-rect" x="24" y="248" width="90" height="38" stroke="#8B5CF6" stroke-opacity=".7"/>
+      <text class="node-title" x="69" y="261" text-anchor="middle" dominant-baseline="central" fill="#C4B5FD" font-size="9">Order-Svc-1</text>
+      <text class="node-sub" x="69" y="273" text-anchor="middle" dominant-baseline="central">Spring · ●live</text>
+      <circle id="pod1-indicator" cx="104" cy="252" r="3" fill="#10B981"/>
+    </g>
+    <g id="n-pod2" class="node-group gnode" onclick="nodeClick('pod2',event)">
+      <rect class="node-rect" x="200" y="248" width="90" height="38" stroke="#8B5CF6" stroke-opacity=".7"/>
+      <text class="node-title" x="245" y="261" text-anchor="middle" dominant-baseline="central" fill="#C4B5FD" font-size="9">Order-Svc-2</text>
+      <text class="node-sub" x="245" y="273" text-anchor="middle" dominant-baseline="central">Spring · ●live</text>
+      <circle id="pod2-indicator" cx="280" cy="252" r="3" fill="#10B981"/>
+    </g>
+    <g id="n-pod3" class="node-group gnode" onclick="nodeClick('pod3',event)">
+      <rect class="node-rect" x="376" y="248" width="90" height="38" stroke="#8B5CF6" stroke-opacity=".5"/>
+      <text class="node-title" x="421" y="261" text-anchor="middle" dominant-baseline="central" fill="#C4B5FD" font-size="9">User-Svc-1</text>
+      <text class="node-sub" x="421" y="273" text-anchor="middle" dominant-baseline="central">Spring · ●live</text>
+      <circle id="pod3-indicator" cx="456" cy="252" r="3" fill="#10B981"/>
+    </g>
+
+    <!-- ===== DATA LAYER ===== -->
+    <!-- Redis Cache -->
+    <g id="n-redis" class="node-group gnode" onclick="nodeClick('redis',event)">
+      <circle class="ring ring-anim" cx="69" cy="330" r="22" stroke="#10B981" style="animation-delay:.6s"/>
+      <rect class="node-rect" x="24" y="316" width="90" height="30" stroke="#10B981" stroke-opacity=".6"/>
+      <text class="node-title" x="69" y="329" text-anchor="middle" dominant-baseline="central" fill="#6EE7B7">Redis</text>
+      <text class="node-sub" x="69" y="340" text-anchor="middle" dominant-baseline="central">Cache · 84% hit</text>
+    </g>
+    <!-- PostgreSQL -->
+    <g id="n-db" class="node-group gnode" onclick="nodeClick('db',event)">
+      <circle class="ring ring-anim" cx="245" cy="330" r="24" stroke="#3B82F6" style="animation-delay:1s"/>
+      <rect class="node-rect" x="176" y="316" width="138" height="30" stroke="#3B82F6" stroke-opacity=".6"/>
+      <text class="node-title" x="245" y="329" text-anchor="middle" dominant-baseline="central" fill="#93C5FD">PostgreSQL</text>
+      <text class="node-sub" x="245" y="340" text-anchor="middle" dominant-baseline="central">Primary · 3.2k QPS</text>
+    </g>
+    <!-- DB Replica -->
+    <g id="n-replica" class="node-group gnode" onclick="nodeClick('replica',event)">
+      <rect class="node-rect" x="370" y="316" width="106" height="30" stroke="#3B82F6" stroke-opacity=".35"/>
+      <text class="node-title" x="423" y="329" text-anchor="middle" dominant-baseline="central" fill="#60A5FA" font-size="9">DB Replica</text>
+      <text class="node-sub" x="423" y="340" text-anchor="middle" dominant-baseline="central">read scale · lag 0.2ms</text>
+    </g>
+
+    <!-- ===== KAFKA BROKER ===== -->
+    <g id="n-kafka" class="node-group gnode" onclick="nodeClick('kafka',event)">
+      <rect class="node-rect" x="176" y="388" width="138" height="30" stroke="#EC4899" stroke-opacity=".7"/>
+      <circle class="ring ring-anim" cx="245" cy="403" r="24" stroke="#EC4899" style="animation-delay:.3s"/>
+      <text class="node-title" x="245" y="400" text-anchor="middle" dominant-baseline="central" fill="#F9A8D4">Kafka</text>
+      <text class="node-sub" x="245" y="412" text-anchor="middle" dominant-baseline="central">12k msg/s · 8 partitions</text>
+    </g>
+
+    <!-- ===== KAFKA CONSUMERS (below Kafka) ===== -->
+    <!-- Notification -->
+    <g id="n-notif" class="node-group gnode" onclick="nodeClick('notif',event)">
+      <rect class="node-rect" x="24" y="388" width="80" height="30" stroke="#EC4899" stroke-opacity=".4"/>
+      <text class="node-title" x="64" y="400" text-anchor="middle" dominant-baseline="central" fill="#F9A8D4" font-size="8.5">Notif Svc</text>
+      <text class="node-sub" x="64" y="412" text-anchor="middle" dominant-baseline="central">email · push</text>
+    </g>
+    <!-- Analytics -->
+    <g id="n-analytics" class="node-group gnode" onclick="nodeClick('analytics',event)">
+      <rect class="node-rect" x="376" y="388" width="80" height="30" stroke="#EC4899" stroke-opacity=".4"/>
+      <text class="node-title" x="416" y="400" text-anchor="middle" dominant-baseline="central" fill="#F9A8D4" font-size="8.5">Analytics</text>
+      <text class="node-sub" x="416" y="412" text-anchor="middle" dominant-baseline="central">events · BigQuery</text>
+    </g>
+
+    <!-- ===== CI/CD + MONITORING ===== -->
+    <g id="n-git" class="node-group gnode" onclick="nodeClick('git',event)">
+      <rect class="node-rect" x="20" y="428" width="56" height="24" stroke="#64748B" stroke-opacity=".5"/>
+      <text class="node-title" x="48" y="438" text-anchor="middle" dominant-baseline="central" fill="#94A3B8" font-size="9">GitHub</text>
+      <text class="node-sub" x="48" y="448" text-anchor="middle" dominant-baseline="central">push·PR</text>
+    </g>
+    <g id="n-ci" class="node-group gnode" onclick="nodeClick('ci',event)">
+      <rect class="node-rect" x="86" y="428" width="56" height="24" stroke="#F59E0B" stroke-opacity=".5"/>
+      <text class="node-title" x="114" y="438" text-anchor="middle" dominant-baseline="central" fill="#FCD34D" font-size="9">CI Build</text>
+      <text class="node-sub" x="114" y="448" text-anchor="middle" dominant-baseline="central">test·lint</text>
+    </g>
+    <g id="n-docker" class="node-group gnode" onclick="nodeClick('docker',event)">
+      <rect class="node-rect" x="152" y="428" width="56" height="24" stroke="#3B82F6" stroke-opacity=".5"/>
+      <text class="node-title" x="180" y="438" text-anchor="middle" dominant-baseline="central" fill="#93C5FD" font-size="9">Docker</text>
+      <text class="node-sub" x="180" y="448" text-anchor="middle" dominant-baseline="central">ECR push</text>
+    </g>
+    <g id="n-k8s" class="node-group gnode" onclick="nodeClick('k8s',event)">
+      <circle class="ring ring-anim" cx="252" cy="440" r="16" stroke="#8B5CF6" style="animation-delay:.3s"/>
+      <rect class="node-rect" x="220" y="428" width="64" height="24" stroke="#8B5CF6" stroke-opacity=".6"/>
+      <text class="node-title" x="252" y="438" text-anchor="middle" dominant-baseline="central" fill="#C4B5FD" font-size="9">K8s Deploy</text>
+      <text class="node-sub" x="252" y="448" text-anchor="middle" dominant-baseline="central">rolling</text>
+    </g>
+    <g id="n-monitor" class="node-group gnode" onclick="nodeClick('monitor',event)">
+      <rect class="node-rect" x="296" y="428" width="80" height="24" stroke="#EC4899" stroke-opacity=".5"/>
+      <text class="node-title" x="336" y="438" text-anchor="middle" dominant-baseline="central" fill="#F9A8D4" font-size="9">Prometheus</text>
+      <text class="node-sub" x="336" y="448" text-anchor="middle" dominant-baseline="central">metrics·alert</text>
+    </g>
+    <g id="n-grafana" class="node-group gnode" onclick="nodeClick('grafana',event)">
+      <rect class="node-rect" x="386" y="428" width="76" height="24" stroke="#F59E0B" stroke-opacity=".4"/>
+      <text class="node-title" x="424" y="438" text-anchor="middle" dominant-baseline="central" fill="#FCD34D" font-size="9">Grafana</text>
+      <text class="node-sub" x="424" y="448" text-anchor="middle" dominant-baseline="central">dashboard</text>
+    </g>
+
+    <!-- ===== STATIC PIPE BASE LINES ===== -->
+    <!-- Browser → CDN -->
+    <line class="pipe-base" x1="100" y1="68" x2="140" y2="68" stroke="#10B981"/>
+    <!-- CDN → Nginx -->
+    <line class="pipe-base" x1="216" y1="68" x2="250" y2="68" stroke="#10B981"/>
+    <!-- Nginx → Gateway -->
+    <path class="pipe-base" d="M288 84 Q288 130 320 143" stroke="#F59E0B" fill="none"/>
+    <!-- Browser → Gateway direct -->
+    <path class="pipe-base" d="M60 84 Q60 143 170 143" stroke="#3B82F6" fill="none"/>
+    <!-- Gateway → LB -->
+    <line class="pipe-base" x1="245" y1="159" x2="245" y2="210" stroke="#EC4899"/>
+    <!-- LB → Pod1 -->
+    <path class="pipe-base" d="M195 238 L114 248" stroke="#8B5CF6" fill="none"/>
+    <!-- LB → Pod2 -->
+    <line class="pipe-base" x1="245" y1="238" x2="245" y2="248" stroke="#8B5CF6"/>
+    <!-- LB → Pod3 -->
+    <path class="pipe-base" d="M295 238 L376 252" stroke="#8B5CF6" fill="none"/>
+    <!-- Pod1 → Redis -->
+    <line class="pipe-base" x1="69" y1="286" x2="69" y2="316" stroke="#10B981"/>
+    <!-- Pod2 → DB -->
+    <line class="pipe-base" x1="245" y1="286" x2="245" y2="316" stroke="#3B82F6"/>
+    <!-- Pod3 → Replica -->
+    <path class="pipe-base" d="M421 286 L423 316" stroke="#3B82F6" fill="none"/>
+    <!-- DB → Kafka publish -->
+    <path class="pipe-base" d="M245 346 L245 388" stroke="#EC4899" fill="none"/>
+    <!-- Kafka → Notif consumer -->
+    <path class="pipe-base" d="M200 403 L104 403" stroke="#EC4899" fill="none"/>
+    <!-- Kafka → Analytics consumer -->
+    <path class="pipe-base" d="M314 403 L376 403" stroke="#EC4899" fill="none"/>
+    <!-- CI/CD pipes -->
+    <line class="pipe-base" x1="76" y1="440" x2="86" y2="440" stroke="#64748B"/>
+    <line class="pipe-base" x1="142" y1="440" x2="152" y2="440" stroke="#F59E0B"/>
+    <line class="pipe-base" x1="208" y1="440" x2="220" y2="440" stroke="#3B82F6"/>
+    <line class="pipe-base" x1="284" y1="440" x2="296" y2="440" stroke="#8B5CF6"/>
+    <line class="pipe-base" x1="376" y1="440" x2="386" y2="440" stroke="#EC4899"/>
+    <!-- Monitor → K8s pod feedback -->
+    <path class="pipe-base" d="M296 434 Q280 420 280 404 Q280 380 245 370" stroke="#EC4899" fill="none" stroke-dasharray="3 5"/>
+
+    <!-- ===== ANIMATED PIPES (glowing) ===== -->
+    <line class="pipe-anim" x1="100" y1="68" x2="140" y2="68" stroke="#10B981"/>
+    <line class="pipe-anim" x1="216" y1="68" x2="250" y2="68" stroke="#10B981"/>
+    <path class="pipe-anim" d="M60 84 Q60 143 170 143" stroke="#3B82F6" fill="none"/>
+    <line class="pipe-anim" x1="245" y1="159" x2="245" y2="210" stroke="#EC4899"/>
+    <path class="pipe-anim" d="M195 238 L114 248" stroke="#8B5CF6" fill="none"/>
+    <line class="pipe-anim" x1="245" y1="238" x2="245" y2="248" stroke="#8B5CF6"/>
+    <path class="pipe-anim" d="M295 238 L376 252" stroke="#8B5CF6" fill="none"/>
+    <line class="pipe-anim" x1="69" y1="286" x2="69" y2="316" stroke="#10B981"/>
+    <line class="pipe-anim" x1="245" y1="286" x2="245" y2="316" stroke="#3B82F6"/>
+    <path class="pipe-anim" d="M245 346 L245 388" stroke="#EC4899" fill="none"/>
+    <path class="pipe-anim" d="M200 403 L104 403" stroke="#EC4899" fill="none"/>
+    <path class="pipe-anim" d="M314 403 L376 403" stroke="#EC4899" fill="none"/>
+    <!-- CI/CD -->
+    <line class="pipe-anim" x1="76" y1="440" x2="86" y2="440" stroke="#64748B"/>
+    <line class="pipe-anim" x1="142" y1="440" x2="152" y2="440" stroke="#F59E0B"/>
+    <line class="pipe-anim" x1="208" y1="440" x2="220" y2="440" stroke="#3B82F6"/>
+    <line class="pipe-anim" x1="284" y1="440" x2="296" y2="440" stroke="#8B5CF6"/>
+
+    <!-- RETURN PIPES (response flows back) -->
+    <line class="pipe-return" x1="218" y1="319" x2="218" y2="215" stroke="#10B981" style="animation-delay:.3s"/>
+    <line class="pipe-return" x1="243" y1="208" x2="243" y2="161" stroke="#10B981" style="animation-delay:.5s"/>
+    <path class="pipe-return" d="M169 140 Q58 140 58 86" stroke="#10B981" fill="none" style="animation-delay:.7s"/>
+  </svg>
+
+  <!-- TOOLTIP -->
+  <div class="tooltip-box" id="tt">
+    <div class="tt-title" id="tt-title">Node</div>
+    <div id="tt-body"></div>
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="side-panel">
+  <div class="panel-section">
+    <div class="panel-label">K8s pods · order-svc &amp; user-svc</div>
+    <div class="pod-grid" id="pod-grid"></div>
+    <div style="font-size:8.5px;color:var(--txt3);margin-top:5px" id="pod-summary">12 running · 0 warn · 0 failed</div>
+  </div>
+
+  <div class="panel-section">
+    <div class="panel-label">Request throughput</div>
+    <div class="mini-chart" id="mini-chart"></div>
+  </div>
+
+  <!-- QUEUE STATUS -->
+  <div class="panel-section">
+    <div class="panel-label">Request Queue · API Gateway</div>
+    <div id="queue-vis" style="display:flex;flex-direction:column;gap:3px;margin-top:2px"></div>
+    <div style="font-size:8px;color:var(--txt3);margin-top:4px" id="queue-status">Queue depth: 0 · processing...</div>
+  </div>
+
+  <div class="panel-section">
+    <div class="panel-label">CI/CD pipeline · build #<span id="build-num">847</span></div>
+    <div class="cicd-bar" id="cicd-bar">
+      <div class="cicd-step done"></div>
+      <div class="cicd-step done"></div>
+      <div class="cicd-step run"></div>
+      <div class="cicd-step"></div>
+      <div class="cicd-step"></div>
+    </div>
+    <div class="cicd-labels">
+      <div class="cicd-lbl">clone</div><div class="cicd-lbl">test</div>
+      <div class="cicd-lbl">build</div><div class="cicd-lbl">push</div><div class="cicd-lbl">deploy</div>
+    </div>
+    <div style="font-size:8.5px;color:var(--txt3);margin-top:5px" id="cicd-status">● Building docker image... 38s elapsed</div>
+  </div>
+
+  <div class="panel-section" style="flex:1;overflow:hidden">
+    <div class="panel-label">Live terminal</div>
+    <div class="term" id="term"></div>
+  </div>
+</div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-row">
+  <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>API request (→)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div>Kafka event</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Response / DB (←)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>Failed req</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FACC15"></div>Retry</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Cache miss → DB</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#EC4899"></div>Kafka fan-out</div>
+  <div class="legend-item" style="margin-left:auto;font-size:8px;color:#2d4a6e">← dashed = response flow</div>
+</div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let playing = true, speed = 1, buildStep = 2, buildTime = 38, tick = 0;
+let liveRps = 0, errorBurst = false;
+let totalPackets = 0;
+
+// ─── Node metadata ───────────────────────────────────────────────────────────
+const NODE_DATA = {
+  browser: {title:'Browser / React SPA',rows:[['Protocol','HTTPS / HTTP2'],['Auth','JWT cookie'],['TTFB','< 50ms'],['Keep-alive','yes']]},
+  cdn:     {title:'CloudFront CDN',rows:[['Cache-hit','94.2%'],['Edge PoPs','12 regions'],['Assets','JS · CSS · media'],['TTL','86400s']]},
+  nginx:   {title:'Nginx Reverse Proxy',rows:[['SSL','TLS 1.3'],['Connections','14.2k active'],['Workers','16'],['Uptime','99.98%']]},
+  gateway: {title:'API Gateway',rows:[['Auth','JWT RS256'],['Rate limit','5k req/s'],['Routes','42 endpoints'],['p50 lat','8ms']]},
+  lb:      {title:'Envoy Load Balancer',rows:[['Strategy','Weighted Round-Robin'],['Backends','3 pods'],['Health','3/3 up'],['Algo','WRR']]},
+  pod1:    {title:'Order-Svc-1 (Pod)',rows:[['Framework','Spring Boot 3.2'],['CPU','41%'],['Memory','420 MB'],['Req/s','1.6k']]},
+  pod2:    {title:'Order-Svc-2 (Pod)',rows:[['Framework','Spring Boot 3.2'],['CPU','38%'],['Memory','385 MB'],['Req/s','1.8k']]},
+  pod3:    {title:'User-Svc-1 (Pod)',rows:[['Framework','Spring Boot 3.2'],['CPU','29%'],['Memory','310 MB'],['Req/s','1.2k']]},
+  redis:   {title:'Redis Cache (L1)',rows:[['Hit rate','84.2%'],['Memory','2.1 GB / 4 GB'],['Eviction','LRU'],['Ops/s','48k']]},
+  db:      {title:'PostgreSQL 15 Primary',rows:[['Connections','142 / 200'],['QPS','3.2k'],['WAL lag','0.2ms'],['Size','847 GB']]},
+  replica: {title:'PostgreSQL Read Replica',rows:[['Lag','0.2ms'],['Queries','1.8k/s'],['Replicas','2'],['Mode','streaming WAL']]},
+  kafka:   {title:'Kafka Cluster',rows:[['Topics','12'],['Partitions','8 / topic'],['msg/s','12.4k'],['Retention','7d']]},
+  notif:   {title:'Notification Service',rows:[['Consumer','order.created'],['Email/s','240'],['Push/s','820'],['SLA','< 500ms']]},
+  analytics:{title:'Analytics Consumer',rows:[['Consumer','order.*'],['Events/s','4.2k'],['Sink','BigQuery'],['Lag','0ms']]},
+  git:     {title:'GitHub',rows:[['Repo','backend-api'],['Branch','main'],['Commits','3 today'],['CI trigger','push hook']]},
+  ci:      {title:'CI Build (GH Actions)',rows:[['Tests','847 passed'],['Coverage','91%'],['Lint','clean'],['Time','2m 14s']]},
+  docker:  {title:'Docker Build',rows:[['Base','eclipse-temurin:21'],['Size','284 MB'],['Layers','12'],['Registry','ECR']]},
+  k8s:     {title:'Kubernetes Deploy',rows:[['Strategy','RollingUpdate'],['MaxSurge','25%'],['Pods','12 running'],['Namespace','prod']]},
+  monitor: {title:'Prometheus / Alertmanager',rows:[['Scrape','15s interval'],['Metrics','4200+'],['Alerts','2 firing'],['Retention','30d']]},
+  grafana: {title:'Grafana Dashboard',rows:[['Dashboards','24'],['Panels','180+'],['Datasource','Prometheus'],['Users','8']]},
+};
+
+// ─── Packet Route Definitions ─────────────────────────────────────────────────
+// Format: {type, path:[{x,y},...], color, label, dur, returnPath}
+const ROUTE_DEFS = [
+  // API Request: Browser → CDN → Nginx → Gateway → LB → Pod1 → Redis (cache hit) → Response back
+  {type:'api', label:'GET /orders',
+   path:[{x:.12,y:.153},{x:.36,y:.153},{x:.59,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.14,y:.56}],
+   retPath:[{x:.14,y:.56},{x:.14,y:.47},{x:.5,y:.47},{x:.5,y:.32},{x:.12,y:.19}],
+   color:'#3B82F6', retColor:'#10B981', dur:1400, cacheHit:true},
+
+  // POST request: Browser → Gateway → LB → Pod2 → DB write → Kafka
+  {type:'api', label:'POST /payment',
+   path:[{x:.12,y:.153},{x:.5,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.5,y:.56},{x:.5,y:.73}],
+   retPath:[{x:.5,y:.73},{x:.5,y:.56},{x:.5,y:.47},{x:.5,y:.32},{x:.5,y:.153},{x:.12,y:.153}],
+   color:'#3B82F6', retColor:'#10B981', dur:1600},
+
+  // Auth request: Browser → Gateway (JWT check)
+  {type:'api', label:'JWT Auth',
+   path:[{x:.12,y:.19},{x:.35,y:.32}],
+   retPath:[{x:.35,y:.32},{x:.12,y:.19}],
+   color:'#F59E0B', retColor:'#10B981', dur:700},
+
+  // Kafka event: Pod2 → Kafka → Notif service
+  {type:'kafka', label:'order.created',
+   path:[{x:.5,y:.56},{x:.5,y:.73},{x:.5,y:.88},{x:.13,y:.88}],
+   color:'#8B5CF6', dur:1000},
+
+  // Kafka event: Pod → Kafka → Analytics
+  {type:'kafka', label:'Kafka Event',
+   path:[{x:.5,y:.73},{x:.5,y:.88},{x:.85,y:.88}],
+   color:'#EC4899', dur:900},
+
+  // DB Response: DB → Pod1
+  {type:'response', label:'SQL Result',
+   path:[{x:.5,y:.73},{x:.14,y:.56},{x:.5,y:.47}],
+   color:'#10B981', dur:800},
+
+  // Cache HIT: Redis → Pod1 (fast green)
+  {type:'cache', label:'Cache HIT',
+   path:[{x:.14,y:.73},{x:.14,y:.56}],
+   color:'#10B981', dur:400},
+
+  // LB → Pod3 (user svc)
+  {type:'api', label:'GET /users',
+   path:[{x:.5,y:.47},{x:.86,y:.56},{x:.86,y:.73}],
+   retPath:[{x:.86,y:.73},{x:.86,y:.56},{x:.5,y:.47}],
+   color:'#3B82F6', retColor:'#10B981', dur:1100},
+
+  // DB replication
+  {type:'response', label:'WAL sync',
+   path:[{x:.5,y:.73},{x:.86,y:.73}],
+   color:'#3B82F6', dur:600},
+
+  // Failed request
+  {type:'fail', label:'TIMEOUT',
+   path:[{x:.12,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.14,y:.56}],
+   color:'#EF4444', dur:1000, willFail:true},
+
+  // CI/CD flow
+  {type:'cicd', label:'git push',
+   path:[{x:.1,y:.99},{x:.23,y:.99},{x:.37,y:.99},{x:.52,y:.99}],
+   color:'#64748B', dur:1200},
+];
+
+let routeIdx = 0;
+
+// ─── SVG coordinate helper ────────────────────────────────────────────────────
+function getSvgCoords(rx, ry) {
+  const svg = document.getElementById('arch-svg');
+  const vb = svg.viewBox.baseVal;
+  return {x: rx * vb.width, y: ry * vb.height};
+}
+
+// ─── Core particle spawner ─────────────────────────────────────────────────────
+function spawnPacket(routeDef, forceColor) {
+  if (!playing) return;
+  const layer = document.getElementById('particle-layer');
+  const diagRect = document.getElementById('diag').getBoundingClientRect();
+  const W = diagRect.width, H = diagRect.height;
+
+  const route = routeDef || ROUTE_DEFS[routeIdx % ROUTE_DEFS.length];
+  routeIdx++;
+
+  const col = forceColor || route.color;
+  const path = route.path;
+  if (!path || path.length < 2) return;
+
+  // Convert ratio coords to px
+  const pts = path.map(p => ({x: p.x*W, y: p.y*H}));
+
+  // Segment durations proportional to length
+  const totalLen = pts.slice(1).reduce((acc,p,i)=>{
+    const dx=p.x-pts[i].x,dy=p.y-pts[i].y;
+    return acc+Math.sqrt(dx*dx+dy*dy);
+  },0);
+
+  let segStart = 0;
+  const segDurs = pts.slice(1).map((p,i)=>{
+    const dx=p.x-pts[i].x, dy=p.y-pts[i].y;
+    return (Math.sqrt(dx*dx+dy*dy)/totalLen)*(route.dur/speed);
+  });
+
+  // Build DOM elements
+  const pk = document.createElement('div');
+  pk.style.cssText = `position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;background:${col};box-shadow:0 0 8px ${col},0 0 16px ${col}60;left:${pts[0].x-4}px;top:${pts[0].y-4}px;z-index:20;transition:none`;
+  layer.appendChild(pk);
+
+  // Label
+  let labelEl = null;
+  if (route.label && route.type !== 'cicd') {
+    labelEl = document.createElement('div');
+    labelEl.className = 'pkt-label';
+    labelEl.textContent = route.label;
+    labelEl.style.cssText = `position:absolute;font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:600;white-space:nowrap;padding:1px 4px;border-radius:3px;pointer-events:none;z-index:21;background:${col}22;border:1px solid ${col}55;color:${col};left:${pts[0].x+6}px;top:${pts[0].y-8}px`;
+    layer.appendChild(labelEl);
+  }
+
+  let segIdx = 0;
+  let willFail = route.willFail && Math.random() < 0.4;
+
+  function animSeg(segI, start) {
+    const from = pts[segI], to = pts[segI+1];
+    const dur = segDurs[segI];
+    const s = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now-s)/dur, 1);
+      const e = t<.5?2*t*t:-1+(4-2*t)*t;
+      const cx = from.x+(to.x-from.x)*e;
+      const cy = from.y+(to.y-from.y)*e;
+      pk.style.left = (cx-4)+'px';
+      pk.style.top  = (cy-4)+'px';
+      if (labelEl) {
+        labelEl.style.left = (cx+6)+'px';
+        labelEl.style.top  = (cy-8)+'px';
+      }
+      const opac = t<.08?t*12:t>.88?(1-t)*8.5:1;
+      pk.style.opacity = opac;
+      if (labelEl) labelEl.style.opacity = opac;
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        // Halfway fail check
+        if (willFail && segI === Math.floor(pts.length/2)-1) {
+          pk.style.background = '#EF4444';
+          pk.style.boxShadow = '0 0 10px #EF4444,0 0 20px #EF444460';
+          if (labelEl) { labelEl.textContent = 'FAILED'; labelEl.style.color='#EF4444'; labelEl.style.borderColor='#EF444455'; }
+          setTimeout(()=>{
+            // Retry: turn yellow, go back
+            pk.style.background = '#FACC15';
+            pk.style.boxShadow = '0 0 8px #FACC15,0 0 16px #FACC1560';
+            if (labelEl) { labelEl.textContent = 'RETRY'; labelEl.style.color='#FACC15'; labelEl.style.borderColor='#FACC1555'; }
+            addLog('WARN','Request failed · retry 1/3','warn');
+            setTimeout(()=>{
+              addLog('INFO','Retry success · +28ms latency','ok');
+              spawnRetryPacket(to, pts[0], col);
+              cleanup();
+            }, 600/speed);
+          }, 400/speed);
+          return;
+        }
+
+        if (segI+1 < pts.length-1) {
+          animSeg(segI+1, performance.now());
+        } else {
+          // Reached end — spawn return packet if applicable
+          if (route.retPath) {
+            setTimeout(()=>spawnReturnPacket(route.retPath, route.retColor || '#10B981', route.dur*0.7), 100);
+          }
+          // Cache hit badge
+          if (route.cacheHit) showCacheBadge(to.x, to.y, true);
+          cleanup();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function cleanup() {
+    setTimeout(()=>{ pk.parentNode&&pk.parentNode.removeChild(pk); if(labelEl)labelEl.parentNode&&labelEl.parentNode.removeChild(labelEl); }, 200);
+  }
+
+  animSeg(0, performance.now());
+  totalPackets++;
+  liveRps++;
+}
+
+// ─── Return Packet (response flow back to browser) ────────────────────────────
+function spawnReturnPacket(retPath, col, dur) {
+  if (!playing) return;
+  const layer = document.getElementById('particle-layer');
+  const diagRect = document.getElementById('diag').getBoundingClientRect();
+  const W = diagRect.width, H = diagRect.height;
+  const pts = retPath.map(p => ({x: p.x*W, y: p.y*H}));
+  if (pts.length < 2) return;
+
+  const pk = document.createElement('div');
+  pk.style.cssText = `position:absolute;width:5px;height:5px;border-radius:50%;pointer-events:none;background:${col};box-shadow:0 0 6px ${col};opacity:.85;z-index:18;transition:none;left:${pts[0].x-2.5}px;top:${pts[0].y-2.5}px`;
+  layer.appendChild(pk);
+
+  const totalLen = pts.slice(1).reduce((a,p,i)=>{const dx=p.x-pts[i].x,dy=p.y-pts[i].y;return a+Math.sqrt(dx*dx+dy*dy);},0);
+  const segDurs = pts.slice(1).map((p,i)=>{const dx=p.x-pts[i].x,dy=p.y-pts[i].y;return (Math.sqrt(dx*dx+dy*dy)/totalLen)*((dur||900)/speed);});
+
+  function animSeg(si, s) {
+    const from=pts[si],to=pts[si+1],d=segDurs[si];
+    function frame(now) {
+      const t=Math.min((now-s)/d,1),e=t<.5?2*t*t:-1+(4-2*t)*t;
+      pk.style.left=(from.x+(to.x-from.x)*e-2.5)+'px';
+      pk.style.top=(from.y+(to.y-from.y)*e-2.5)+'px';
+      pk.style.opacity=t<.1?t*8.5:t>.85?(1-t)*6.7:.85;
+      if(t<1)requestAnimationFrame(frame);
+      else if(si+1<pts.length-1)animSeg(si+1,performance.now());
+      else setTimeout(()=>pk.parentNode&&pk.parentNode.removeChild(pk),150);
+    }
+    requestAnimationFrame(frame);
+  }
+  animSeg(0, performance.now());
+}
+
+// ─── Retry packet (failed → bounces back → retries) ──────────────────────────
+function spawnRetryPacket(from, to, col) {
+  const layer = document.getElementById('particle-layer');
+  const pk = document.createElement('div');
+  pk.style.cssText = `position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;background:#FACC15;box-shadow:0 0 8px #FACC15,0 0 16px #FACC1560;left:${from.x-3.5}px;top:${from.y-3.5}px;z-index:22`;
+  layer.appendChild(pk);
+  const dur = 900/speed;
+  const s = performance.now();
+  function frame(now) {
+    const t=Math.min((now-s)/dur,1),e=t<.5?2*t*t:-1+(4-2*t)*t;
+    pk.style.left=(from.x+(to.x-from.x)*e-3.5)+'px';
+    pk.style.top=(from.y+(to.y-from.y)*e-3.5)+'px';
+    pk.style.opacity=t<.1?t*10:t>.88?(1-t)*8:1;
+    if(t<1)requestAnimationFrame(frame);
+    else { pk.style.background='#10B981'; pk.style.boxShadow='0 0 8px #10B981'; setTimeout(()=>pk.parentNode&&pk.parentNode.removeChild(pk),300); }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ─── Cache Hit/Miss badges ─────────────────────────────────────────────────────
+function showCacheBadge(x, y, isHit) {
+  const layer = document.getElementById('badge-layer');
+  const b = document.createElement('div');
+  b.className = 'cache-badge ' + (isHit ? 'cache-hit' : 'cache-miss');
+  b.textContent = isHit ? '⚡ CACHE HIT' : '⚠ CACHE MISS';
+  b.style.left = (x+10)+'px';
+  b.style.top  = (y-12)+'px';
+  layer.appendChild(b);
+  setTimeout(()=>{ b.style.transition='opacity .4s'; b.style.opacity='0'; setTimeout(()=>b.parentNode&&b.parentNode.removeChild(b),450); }, 1200);
+}
+
+// ─── Multi-packet burst (concurrent traffic) ─────────────────────────────────
+const BURST_ROUTES = [
+  {type:'api',label:'GET /orders',path:[{x:.12,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.14,y:.56}],retPath:[{x:.14,y:.56},{x:.5,y:.47},{x:.5,y:.32},{x:.12,y:.153}],color:'#3B82F6',retColor:'#10B981',dur:1300},
+  {type:'api',label:'POST /payment',path:[{x:.12,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.5,y:.56},{x:.5,y:.73}],retPath:[{x:.5,y:.73},{x:.5,y:.56},{x:.5,y:.47},{x:.5,y:.32},{x:.12,y:.153}],color:'#3B82F6',retColor:'#10B981',dur:1600},
+  {type:'api',label:'JWT Auth',path:[{x:.12,y:.19},{x:.35,y:.32}],retPath:[{x:.35,y:.32},{x:.12,y:.19}],color:'#F59E0B',retColor:'#10B981',dur:650},
+  {type:'kafka',label:'order.created',path:[{x:.5,y:.56},{x:.5,y:.73},{x:.5,y:.88},{x:.13,y:.88}],color:'#8B5CF6',dur:1100},
+  {type:'kafka',label:'Kafka Event',path:[{x:.5,y:.73},{x:.5,y:.88},{x:.85,y:.88}],color:'#EC4899',dur:950},
+  {type:'response',label:'SQL Row',path:[{x:.5,y:.73},{x:.14,y:.56}],color:'#10B981',dur:700},
+  {type:'cache',label:'Cache HIT',path:[{x:.14,y:.73},{x:.14,y:.56}],color:'#10B981',dur:350,cacheHit:true},
+  {type:'api',label:'GET /users',path:[{x:.5,y:.47},{x:.86,y:.56},{x:.86,y:.73}],retPath:[{x:.86,y:.73},{x:.86,y:.56},{x:.5,y:.47}],color:'#3B82F6',retColor:'#10B981',dur:1050},
+  {type:'response',label:'WAL sync',path:[{x:.5,y:.73},{x:.86,y:.73}],color:'#3B82F6',dur:600},
+  {type:'api',label:'DELETE /cart',path:[{x:.12,y:.153},{x:.35,y:.32},{x:.5,y:.47},{x:.14,y:.56}],retPath:[{x:.14,y:.56},{x:.5,y:.47},{x:.35,y:.32},{x:.12,y:.153}],color:'#3B82F6',retColor:'#10B981',dur:1200},
+  {type:'kafka',label:'payment.ok',path:[{x:.5,y:.56},{x:.5,y:.73},{x:.5,y:.88},{x:.13,y:.88}],color:'#8B5CF6',dur:1000},
+  {type:'kafka',label:'Analytics',path:[{x:.5,y:.88},{x:.85,y:.88}],color:'#EC4899',dur:800},
+  {type:'api',label:'GET /health',path:[{x:.35,y:.32},{x:.5,y:.47}],retPath:[{x:.5,y:.47},{x:.35,y:.32}],color:'#10B981',retColor:'#10B981',dur:400},
+  {type:'fail',label:'TIMEOUT',path:[{x:.12,y:.153},{x:.5,y:.32},{x:.5,y:.47},{x:.14,y:.56}],color:'#EF4444',dur:1000,willFail:true},
+  {type:'response',label:'200 OK',path:[{x:.5,y:.56},{x:.5,y:.47},{x:.5,y:.32},{x:.12,y:.19}],color:'#10B981',dur:900},
+  {type:'cicd',label:'git push',path:[{x:.1,y:.99},{x:.23,y:.99},{x:.37,y:.99}],color:'#64748B',dur:1100},
+];
+
+let burstIdx = 0;
+function spawnBurst() {
+  // Spawn 2-4 simultaneous packets with staggered delays
+  const count = 2 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < count; i++) {
+    const delay = i * (80 + Math.random() * 120);
+    setTimeout(()=>{
+      if(!playing) return;
+      const route = BURST_ROUTES[burstIdx % BURST_ROUTES.length];
+      burstIdx++;
+      spawnPacket(route);
+    }, delay/speed);
+  }
+}
+
+// ─── Logs ──────────────────────────────────────────────────────────────────────
+const LOGS = [
+  ['INFO','GET /api/orders → 200 · 38ms','ok'],
+  ['INFO','JWT verified · user_id=u_8821','ok'],
+  ['WARN','Redis MISS /orders/u_8821 → DB fallback','warn'],
+  ['INFO','SELECT orders WHERE uid=$1 · 18ms · 3 rows','ok'],
+  ['INFO','Kafka PUBLISH order.created · offset=48821','ok'],
+  ['INFO','Response 200 · gzip · 1.2kb → browser','ok'],
+  ['WARN','CPU spike node-3 · 89% > threshold','warn'],
+  ['INFO','K8s autoscale order-svc 5→6 pods','ok'],
+  ['INFO','CI build #847 · test phase done','ok'],
+  ['INFO','Docker push ecr.io/backend:sha-a4f2c · 4.2s','ok'],
+  ['ERR' ,'DB conn timeout · retry 1/3','err'],
+  ['INFO','DB retry success · +22ms latency','ok'],
+  ['INFO','Kafka consumer lag · 0 msgs behind','ok'],
+  ['INFO','Prometheus alert RESOLVED · error_rate','ok'],
+  ['WARN','Cache MISS /payments/p_2210 · DB query','warn'],
+  ['INFO','Cache SET /payments/p_2210 · TTL=300s','ok'],
+  ['INFO','POST /payment → 201 Created · 142ms','ok'],
+  ['INFO','Envoy health-check pod-2 → HEALTHY','ok'],
+  ['WARN','Kafka lag topic=analytics 42 msgs','warn'],
+  ['INFO','HPA scale event: 8→9 pods · CPU 82%','ok'],
+  ['ERR' ,'Pod order-svc-4 OOMKilled · restarting','err'],
+  ['INFO','Pod order-svc-4 Recovered · ready','ok'],
+  ['INFO','GET /users/u_8821 → 200 · Cache HIT','ok'],
+];
+let logIdx = 0, termEl;
+function addLog(lvl, msg, cls) {
+  if (!termEl) termEl = document.getElementById('term');
+  if (!lvl) { [lvl,msg,cls] = LOGS[logIdx % LOGS.length]; logIdx++; }
+  const now = new Date();
+  const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const line = document.createElement('div');
+  line.className = 'term-line';
+  const clsMap = {ok:'t-info',warn:'t-warn',err:'t-err',retry:'t-retry'};
+  line.innerHTML = `<span class="t-time">[${ts}]</span><span class="${clsMap[cls]||'t-info'}">${(lvl+'   ').slice(0,4)}</span><span class="t-msg">${msg}</span>`;
+  if (termEl.children.length >= 10) termEl.removeChild(termEl.firstChild);
+  termEl.appendChild(line);
+  termEl.scrollTop = termEl.scrollHeight;
+}
+
+// ─── Queue visualizer ─────────────────────────────────────────────────────────
+function updateQueue() {
+  const qv = document.getElementById('queue-vis');
+  qv.innerHTML = '';
+  const depth = Math.floor(Math.random() * 14);
+  const colors = ['#3B82F6','#8B5CF6','#F59E0B','#10B981','#EC4899'];
+  for (let i = 0; i < Math.min(depth, 8); i++) {
+    const bar = document.createElement('div');
+    const w = 30 + Math.random()*60;
+    const col = colors[i%colors.length];
+    bar.style.cssText = `height:3px;border-radius:2px;background:${col};width:${w}%;opacity:${0.4+i*0.07};transition:width .4s ease`;
+    qv.appendChild(bar);
+  }
+  document.getElementById('queue-status').textContent = `Queue depth: ${depth} · ${depth>8?'throttling':'processing'}...`;
+}
+
+// ─── Pods ─────────────────────────────────────────────────────────────────────
+function initPods() {
+  const g = document.getElementById('pod-grid');
+  g.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'pod';
+    p.id = `pod-${i}`;
+    p.textContent = `P${i+1}`;
+    p.style.animationDelay = (i*0.18)+'s';
+    g.appendChild(p);
+  }
+}
+
+// ─── Mini chart ───────────────────────────────────────────────────────────────
+function initMiniChart() {
+  const c = document.getElementById('mini-chart');
+  c.innerHTML = '';
+  const vals = [28,45,62,38,71,55,80,42,66,58,75,68];
+  vals.forEach((v,i) => {
+    const b = document.createElement('div');
+    b.className = 'mini-bar';
+    b.id = `bar-${i}`;
+    b.style.cssText = `flex:1;height:${v}%;background:rgba(59,130,246,${(0.3+v/200).toFixed(2)});border-radius:2px 2px 0 0`;
+    c.appendChild(b);
+  });
+}
+function updateMiniChart() {
+  for (let i = 0; i < 12; i++) {
+    const b = document.getElementById(`bar-${i}`);
+    if (b) {
+      const v = Math.round(25+Math.random()*60);
+      b.style.height = v+'%';
+      b.style.background = `rgba(59,130,246,${(0.3+v/200).toFixed(2)})`;
+    }
+  }
+}
+
+// ─── Metrics ──────────────────────────────────────────────────────────────────
+function updateMetrics() {
+  const rps  = Math.round(4200+Math.random()*1400);
+  const lat  = Math.round(110+Math.random()*80);
+  const kafka= (9+Math.random()*6).toFixed(1);
+  const cache= Math.round(78+Math.random()*12);
+  const cpu  = Math.round(58+Math.random()*28);
+  const err  = (0.04+Math.random()*0.22).toFixed(2);
+
+  document.getElementById('m-rps').textContent   = rps.toLocaleString();
+  document.getElementById('m-lat').textContent   = lat+'ms';
+  document.getElementById('m-kafka').textContent = kafka+'k';
+  document.getElementById('m-cache').textContent = cache+'%';
+  document.getElementById('m-cpu').textContent   = cpu+'%';
+  document.getElementById('m-err').textContent   = err+'%';
+
+  document.getElementById('b-rps').style.width   = Math.round(rps/80)+'%';
+  document.getElementById('b-lat').style.width   = Math.round(lat/3.5)+'%';
+  document.getElementById('b-kafka').style.width = Math.round(parseFloat(kafka)*6.5)+'%';
+  document.getElementById('b-cache').style.width = cache+'%';
+  document.getElementById('b-cpu').style.width   = cpu+'%';
+  document.getElementById('b-err').style.width   = Math.round(parseFloat(err)*40)+'%';
+
+  document.getElementById('d-cpu').className = cpu > 80 ? 'm-delta delta-dn' : 'm-delta delta-up';
+  document.getElementById('d-cpu').textContent = cpu > 80 ? '↑ HIGH' : `${cpu}% util`;
+
+  if (cpu > 82) {
+    const rnd = Math.floor(Math.random()*12);
+    const pod = document.getElementById(`pod-${rnd}`);
+    if (pod) { pod.classList.add('warn'); setTimeout(()=>pod&&pod.classList.remove('warn'),2500); }
+  }
+
+  // Live rps counter
+  document.getElementById('rps-live').textContent = `⚡ ${liveRps*3} req/s live`;
+  liveRps = 0;
+
+  // Status pill
+  const sp = document.getElementById('sys-status');
+  if (parseFloat(err) > 0.18 || cpu > 85) {
+    sp.textContent = '⚠ ELEVATED ERRORS'; sp.style.color='#F59E0B'; sp.style.background='rgba(245,158,11,.12)'; sp.style.borderColor='rgba(245,158,11,.3)';
+  } else {
+    sp.textContent = '● SYSTEM HEALTHY'; sp.style.color='#10B981'; sp.style.background='rgba(16,185,129,.12)'; sp.style.borderColor='rgba(16,185,129,.25)';
+  }
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+function injectError() {
+  const pod = document.getElementById(`pod-${Math.floor(Math.random()*12)}`);
+  if (pod) { pod.classList.add('dead'); setTimeout(()=>pod&&pod.classList.remove('dead'),3500); }
+  addLog('ERR','Pod crash · CrashLoopBackOff · restarting','err');
+  // Spawn a failed packet
+  spawnPacket({type:'fail',label:'500 ERR',path:[{x:.5,y:.32},{x:.5,y:.47},{x:.14,y:.56}],color:'#EF4444',dur:800,willFail:true});
+  setTimeout(()=>{ addLog('INFO','Pod recovered · healthy','ok'); },3000/speed);
+}
+
+function injectCacheMiss() {
+  addLog('WARN','Cache MISS · fallback to PostgreSQL query','warn');
+  const diagRect = document.getElementById('diag').getBoundingClientRect();
+  showCacheBadge(80, diagRect.height*0.73, false);
+  // Orange packet from pod to DB (cache miss path)
+  spawnPacket({type:'cache',label:'CACHE MISS',path:[{x:.14,y:.56},{x:.5,y:.73}],color:'#F59E0B',dur:900});
+  setTimeout(()=>{
+    spawnPacket({type:'response',label:'DB result',path:[{x:.5,y:.73},{x:.14,y:.56}],color:'#10B981',dur:700});
+    addLog('INFO','DB query · 24ms · cache populated','ok');
+    const diagRect2 = document.getElementById('diag').getBoundingClientRect();
+    showCacheBadge(80, diagRect2.height*0.56, true);
+  }, 1000/speed);
+}
+
+function triggerAutoscale() {
+  addLog('WARN','CPU threshold exceeded · HPA trigger','warn');
+  setTimeout(()=>{
+    addLog('INFO','K8s autoscale 12→14 pods · scheduling','ok');
+    initPods14();
+  }, 800/speed);
+  setTimeout(()=>{ addLog('INFO','New pods READY · traffic routing updated','ok'); }, 2400/speed);
+}
+
+function initPods14() {
+  const g = document.getElementById('pod-grid');
+  g.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'pod' + (i>=12?' scaling':'');
+    p.id = `pod-${i}`;
+    p.textContent = `P${i+1}`;
+    p.style.animationDelay = (i*0.18)+'s';
+    if (i>=12) p.style.opacity='.6';
+    g.appendChild(p);
+    if(i>=12) setTimeout(()=>{ p.classList.remove('scaling'); p.style.opacity='1'; },1500);
+  }
+  document.getElementById('pod-summary').textContent = '14 running · 2 new · 0 failed';
+  setTimeout(()=>{ document.getElementById('pod-summary').textContent = '14 running · 0 warn · 0 failed'; initPods(); },4000);
+}
+
+function cycleSpeed() {
+  const speeds=[1,1.5,2,0.5],labels=['1× SPEED','1.5× SPEED','2× SPEED','0.5× SPEED'];
+  const cur=speeds.indexOf(speed);
+  speed=speeds[(cur+1)%speeds.length];
+  document.getElementById('btn-speed').textContent=labels[(cur+1)%speeds.length];
+}
+
+function togglePlay() {
+  playing=!playing;
+  const btn=document.getElementById('btn-play');
+  btn.textContent=playing?'⏸ PAUSE':'▶ PLAY';
+  btn.classList.toggle('on',playing);
+  document.querySelectorAll('.pipe-anim').forEach(p=>p.style.animationPlayState=playing?'running':'paused');
+  document.querySelectorAll('.ring-anim').forEach(r=>r.style.animationPlayState=playing?'running':'paused');
+}
+
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
+function nodeClick(id, e) {
+  const data = NODE_DATA[id];
+  if (!data) return;
+  const tt = document.getElementById('tt');
+  document.getElementById('tt-title').textContent = data.title;
+  const body = document.getElementById('tt-body');
+  body.innerHTML = data.rows.map(([k,v])=>`<div class="tt-row"><span class="tt-key">${k}</span><span class="tt-val">${v}</span></div>`).join('');
+  tt.style.display = 'block';
+  const svg = document.getElementById('arch-svg');
+  const svgRect = svg.getBoundingClientRect();
+  const mx = e.clientX - svgRect.left;
+  const my = e.clientY - svgRect.top;
+  tt.style.left = Math.min(mx+12, svgRect.width-205)+'px';
+  tt.style.top  = Math.max(my-10, 8)+'px';
+  setTimeout(()=>{ if(tt)tt.style.display='none'; }, 3500);
+}
+document.getElementById('wrap').addEventListener('click', e=>{
+  if(!e.target.closest('.node-group')) { const tt=document.getElementById('tt'); if(tt)tt.style.display='none'; }
+});
+
+// ─── CI/CD ticker ─────────────────────────────────────────────────────────────
+let buildNum = 847;
+function tickCicd() {
+  buildTime += Math.round(1/speed);
+  const steps = document.querySelectorAll('.cicd-step');
+  if (buildStep < 5 && buildTime > [0,30,60,90,120][buildStep]) {
+    steps[buildStep].classList.remove('run');
+    steps[buildStep].classList.add('done');
+    buildStep++;
+    if (buildStep < 5) steps[buildStep].classList.add('run');
+  }
+  if (buildStep >= 5) {
+    buildTime=0; buildStep=0; buildNum++;
+    steps.forEach(s=>{ s.classList.remove('done','run'); });
+    steps[0].classList.add('run');
+    document.getElementById('build-num').textContent=buildNum;
+    document.getElementById('cicd-status').textContent=`● Starting new build #${buildNum}`;
+  } else {
+    const names=['Cloning repo','Running tests (847)','Building image','Pushing ECR','Deploying K8s'];
+    document.getElementById('cicd-status').textContent=`● ${names[buildStep]} · ${buildTime}s elapsed`;
+  }
+}
+
+// ─── Queue bar animation ──────────────────────────────────────────────────────
+function animQueueBars() {
+  const bars = ['q-bar-1','q-bar-2','q-bar-3'];
+  bars.forEach((id,i)=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    const w = 20 + Math.random()*50;
+    el.setAttribute('width', w);
+    el.style.transition = 'width .4s ease';
+  });
+}
+
+// ─── Main loop ────────────────────────────────────────────────────────────────
+initPods();
+initMiniChart();
+addLog();
+
+let loopTick = 0;
+function loop() {
+  if (playing) {
+    loopTick++;
+
+    // Concurrent packet bursts — fire frequently to show many simultaneous packets
+    if (loopTick % 3 === 0) spawnBurst();
+
+    // Occasional single targeted packets
+    if (loopTick % 7 === 0) {
+      const r = BURST_ROUTES[Math.floor(Math.random()*BURST_ROUTES.length)];
+      spawnPacket(r);
+    }
+
+    if (loopTick % 10 === 0) addLog();
+    if (loopTick % 16 === 0) updateMetrics();
+    if (loopTick % 8 === 0)  updateMiniChart();
+    if (loopTick % 28 === 0) tickCicd();
+    if (loopTick % 6 === 0)  updateQueue();
+    if (loopTick % 20 === 0) animQueueBars();
+
+    // Occasional cache badge on Redis node
+    if (loopTick % 25 === 0) {
+      const diagRect = document.getElementById('diag').getBoundingClientRect();
+      showCacheBadge(diagRect.width*0.16, diagRect.height*0.72, Math.random() > 0.2);
+    }
+  }
+  setTimeout(loop, Math.round(160/speed));
+}
+loop();
+</script>
+</body>
+</html>
